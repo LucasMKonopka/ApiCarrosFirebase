@@ -1,121 +1,50 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:trabalho4/components/my_button.dart';
-import 'package:trabalho4/components/my_textfield.dart';
-import 'package:trabalho4/view/home_page.dart';
+import '../services/auth_service.dart';
 
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
-
-  @override
-  State<RegisterPage> createState() => _RegisterPageState();
-}
-
-class _RegisterPageState extends State<RegisterPage> {
-
-  final userNameController = TextEditingController();
-  final passwordController = TextEditingController();
-  final confirmPassowordController = TextEditingController();
-
-  void showAlert(String message) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(title: Text(message));
-      },
-    );
-  }
-
-  void registerUser() async {
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return const Center(child: CircularProgressIndicator());
-      },
-    );
-
-    try{
-
-      if(passwordController.text == confirmPassowordController.text) {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: userNameController.text,
-          password: passwordController.text
-        );
-        Navigator.pop(context);
-        showAlert("Usuário Cadastrado com Sucesso!");
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomePage(),
-          )
-        );
-      }
-      else {
-        Navigator.pop(context);
-        showAlert("Senhas não conferem!");
-      }
-    }on FirebaseAuthException catch(e) {
-      print(e.code);
-      if(e.code == 'email-already-in-use') {
-        Navigator.pop(context);
-        showDialog(
-          context: context,
-          builder: (context) {
-            return const AlertDialog(title: Text('Esse e-mail já está cadastrado!'));
-          },
-        );
-      }
-    }
-  }
+class RegisterPage extends StatelessWidget {
+  const RegisterPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    TextEditingController emailController = TextEditingController();
+    TextEditingController passwordController = TextEditingController();
+    TextEditingController confirmPasswordController = TextEditingController();
+
     return Scaffold(
-      backgroundColor: Colors.grey[300],
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Center(
-            child: Column(
-              children: <Widget> [
-                const SizedBox(height: 50.0),
-                Text(
-                  'Crie sua conta',
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontSize: 25.0,
-                    fontWeight: FontWeight.bold
-                  ),
-                ),
-                const SizedBox(height: 25.0),
-                MyTextField(
-                  controller: userNameController,
-                  hintText: "E-mail",
-                  obscureText: false,
-                ),
-                const SizedBox(height: 15.0),
-                MyTextField(
-                  controller: passwordController,
-                  hintText: "Senha",
-                  obscureText: true,
-                ),
-                const SizedBox(height: 15.0),
-                MyTextField(
-                  controller: confirmPassowordController,
-                  hintText: "Confirmar Senha",
-                  obscureText: true,
-                ),
-                const SizedBox(height: 25.0),
-                MyButton(
-                  onTap: registerUser,
-                  text: "Cadastrar",
-                )
-              ],
+      appBar: AppBar(
+        title: const Text("Cadastro de Usuário"),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(labelText: "Email"),
             ),
-          ),
+            TextField(
+              controller: passwordController,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: "Senha"),
+            ),
+            TextField(
+              controller: confirmPasswordController,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: "Confirmar Senha"),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                AuthService().userRegister(
+                  context,
+                  emailController,
+                  passwordController,
+                  confirmPasswordController,
+                );
+              },
+              child: const Text("Cadastrar"),
+            ),
+          ],
         ),
       ),
     );

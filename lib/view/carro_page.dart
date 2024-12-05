@@ -27,14 +27,13 @@ class _CarroPageState extends State<CarroPage> {
   @override
   void initState() {
     super.initState();
-    //_editingCarroId = widget.carroId;
     if (widget.carroId.isNotEmpty) {
-      _loadCarroData(widget.carroId); // Carregar os dados do carro para edição
+      _loadCarroData(widget.carroId);
     }
   }
   Future<String?> getCurrentUserId() async {
   final user = FirebaseAuth.instance.currentUser;
-  print(user?.uid); // Verifique o ID do usuário
+  print(user?.uid);
   return user?.uid;
 }
 
@@ -42,7 +41,7 @@ class _CarroPageState extends State<CarroPage> {
   try {
     final carroData = await _carroService.getCarro(carroId);
     setState(() {
-      _editingCarroId = carroId; // Atualiza o ID do carro em edição
+      _editingCarroId = carroId;
       _marcaController.text = carroData['marca'];
       _modeloController.text = carroData['modelo'];
       _anoController.text = carroData['ano'].toString();
@@ -69,7 +68,7 @@ class _CarroPageState extends State<CarroPage> {
   }
   if (ano < 1800 || ano > 2025 || ano < 0) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Ano deve ser maior que 1800, menor que 2025 e não pode ser negativo.')),
+      SnackBar(content: Text('Ano deve ser maior que 1800, menor que 2025 e não pode ser negativo.',)),
     );
     return;
   }
@@ -132,7 +131,8 @@ class _CarroPageState extends State<CarroPage> {
     onWillPop: requestPop,
     child: Scaffold(
       appBar: AppBar(
-        title: Text(_editingCarroId == null ? 'Adicionar Carro' : 'Editar Carro'),
+        backgroundColor: Colors.black,
+        title: Text(_editingCarroId == null ? 'Adicionar Carro' : 'Editar Carro', style: TextStyle(color: Colors.white)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -177,7 +177,7 @@ class _CarroPageState extends State<CarroPage> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _saveCarro,
-              child: Text('Salvar'),
+              child: Text('Salvar', style: TextStyle(color: Colors.black)),
             ),
           ],
         ),

@@ -18,10 +18,9 @@ class _HomePageState extends State<HomePage> {
   Stream<QuerySnapshot> _getCarros() {
     final userId = _auth.currentUser?.uid;
 
-    // Consulta filtrando pelo userId
     return _firestore
         .collection('carros')
-        .where('userId', isEqualTo: userId) // Filtra pelos carros do usuário
+        .where('userId', isEqualTo: userId)
         .snapshots();
   }
 
@@ -29,23 +28,23 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Carros'),
+        backgroundColor: Colors.black,
+        title: Text('Carros', style: TextStyle(color: Colors.white),),
+        
         actions: [
-          // Botão de Logout
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: Icon(Icons.logout, color: Colors.white,),
             onPressed: _logout,
           ),
         ],
       ),
+      
       body: Column(
         children: [
-          // Botão de Adicionar Carro
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
               onPressed: () {
-                // Navegar para a página de adicionar carro (sem docId para criar um novo carro)
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -53,7 +52,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 );
               },
-              child: Text('Adicionar Carro'),
+              child: Text('Adicionar Carro', style: TextStyle(color: Colors.black)),
             ),
           ),
           Expanded(
@@ -78,6 +77,9 @@ class _HomePageState extends State<HomePage> {
                     final docId = carro.id;
                     final marca = carro['marca'];
                     final modelo = carro['modelo'];
+                    final ano = carro['ano'];
+                    final cor = carro['cor'];
+                    final categoria = carro['categoria'];
 
                     return ListTile(
                       title: Text('$marca - $modelo'),
@@ -125,18 +127,48 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _deleteCarro(String docId) async {
+  final shouldDelete = await showDialog<bool>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text("Confirmar Exclusão"),
+        content: Text("Tem certeza que deseja excluir este carro?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: Text("Cancelar"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(true);
+            },
+            child: Text("Excluir"),
+          ),
+        ],
+      );
+    },
+  );
+
+  if (shouldDelete == true) {
     try {
       await _carroService.deleteCarro(docId);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Carro excluído com sucesso!'),
-        duration: Duration(seconds: 2),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Carro excluído com sucesso!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     } catch (e) {
       print('Erro ao excluir o carro: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Falha ao excluir o carro.'),
-        duration: Duration(seconds: 2),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Falha ao excluir o carro.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
+}
 }

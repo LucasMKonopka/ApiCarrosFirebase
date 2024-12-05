@@ -34,12 +34,10 @@ class CarroService {
     });
   }
 
-  // Ler carros pelo userId
   Stream<QuerySnapshot> readCarros(String userId) {
     return carrosCollection.where('userId', isEqualTo: userId).snapshots();
   }
 
-  // Atualizar um carro
   Future<void> updateCarro({
     required String docId,
     String? marca,

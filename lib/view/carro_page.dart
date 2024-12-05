@@ -22,6 +22,7 @@ class _CarroPageState extends State<CarroPage> {
   final TextEditingController _categoriaController = TextEditingController();
 
   String? _editingCarroId;
+  bool _hasUnsavedChanges = false;
 
   @override
   void initState() {
@@ -63,6 +64,12 @@ class _CarroPageState extends State<CarroPage> {
   if (marca.isEmpty || modelo.isEmpty || cor.isEmpty || categoria.isEmpty || ano <= 0) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Preencha todos os campos corretamente.')),
+    );
+    return;
+  }
+  if (ano < 1800 || ano > 2025 || ano < 0) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Ano deve ser maior que 1800, menor que 2025 e não pode ser negativo.')),
     );
     return;
   }
@@ -116,8 +123,11 @@ class _CarroPageState extends State<CarroPage> {
     });
   }
 
+  
+
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       appBar: AppBar(
         title: Text(_editingCarroId == null ? 'Adicionar Carro' : 'Editar Carro'),

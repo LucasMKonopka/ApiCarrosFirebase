@@ -1,10 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:trabalho4/services/carro_service.dart';
-import 'package:trabalho4/view/home_page.dart';
-
 
 class CarroPage extends StatefulWidget {
+  final String carroId;
+
+  CarroPage({required this.carroId});
+
   @override
   _CarroPageState createState() => _CarroPageState();
 }
@@ -20,23 +23,73 @@ class _CarroPageState extends State<CarroPage> {
 
   String? _editingCarroId;
 
+  @override
+  void initState() {
+    super.initState();
+    //_editingCarroId = widget.carroId;
+    if (widget.carroId.isNotEmpty) {
+      _loadCarroData(widget.carroId); // Carregar os dados do carro para edição
+    }
+  }
+  Future<String?> getCurrentUserId() async {
+  final user = FirebaseAuth.instance.currentUser;
+  print(user?.uid); // Verifique o ID do usuário
+  return user?.uid;
+}
+
+  Future<void> _loadCarroData(String carroId) async {
+  try {
+    final carroData = await _carroService.getCarro(carroId);
+    setState(() {
+      _editingCarroId = carroId; // Atualiza o ID do carro em edição
+      _marcaController.text = carroData['marca'];
+      _modeloController.text = carroData['modelo'];
+      _anoController.text = carroData['ano'].toString();
+      _corController.text = carroData['cor'];
+      _categoriaController.text = carroData['categoria'];
+    });
+  } catch (e) {
+    print("Erro ao carregar dados do carro: $e");
+  }
+}
+
   Future<void> _saveCarro() async {
-    final String marca = _marcaController.text;
-    final String modelo = _modeloController.text;
-    final int ano = int.tryParse(_anoController.text) ?? 0;
-    final String cor = _corController.text;
-    final String categoria = _categoriaController.text;
+  final String marca = _marcaController.text.trim();
+  final String modelo = _modeloController.text.trim();
+  final int ano = int.tryParse(_anoController.text) ?? 0;
+  final String cor = _corController.text.trim();
+  final String categoria = _categoriaController.text.trim();
+
+  // Validação dos campos
+  if (marca.isEmpty || modelo.isEmpty || cor.isEmpty || categoria.isEmpty || ano <= 0) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Preencha todos os campos corretamente.')),
+    );
+    return;
+  }
+
+  try {
+    // Obter o ID do usuário autenticado
+    final String? userId = await getCurrentUserId();
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro: Usuário não autenticado.')),
+      );
+      return;
+    }
 
     if (_editingCarroId == null) {
+      // Criar um novo carro
       await _carroService.createCarro(
         marca: marca,
         modelo: modelo,
         ano: ano,
         cor: cor,
         categoria: categoria,
-        userId: 'userIdDoUsuario',
+        userId: userId,
       );
     } else {
+      // Atualizar um carro existente
       await _carroService.updateCarro(
         docId: _editingCarroId!,
         marca: marca,
@@ -47,26 +100,17 @@ class _CarroPageState extends State<CarroPage> {
       );
     }
 
+    // Limpar os campos e retornar à tela anterior
     _clearFields();
-    
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => HomePage()),
+    Navigator.pop(context);
+  } catch (e) {
+    // Tratamento de erros
+    print('Erro ao salvar carro: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Erro ao salvar o carro: $e')),
     );
-    
   }
-
-  void _editCarro(Map<String, dynamic> carro, String carroId) {
-    setState(() {
-      _editingCarroId = carroId;
-      _marcaController.text = carro['marca'];
-      _modeloController.text = carro['modelo'];
-      _anoController.text = carro['ano'].toString();
-      _corController.text = carro['cor'];
-      _categoriaController.text = carro['categoria'];
-    });
-  }
-
+}
   void _clearFields() {
     setState(() {
       _editingCarroId = null;

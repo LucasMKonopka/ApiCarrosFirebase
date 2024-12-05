@@ -6,7 +6,7 @@ class Carro {
   final String cor;
   final String categoria;
   final String? img;
-  final String userId; // Campo obrigatório
+  final String userId;
 
   Carro({
     required this.id,
@@ -16,6 +16,6 @@ class Carro {
     required this.cor,
     required this.categoria,
     this.img,
-    required this.userId, // Garantia de que será informado
+    required this.userId,
   });
 }

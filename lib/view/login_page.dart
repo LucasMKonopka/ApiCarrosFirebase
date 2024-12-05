@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               children: <Widget> [
                 const SizedBox(height: 50.0),
-                const Icon(Icons.lock, size: 100.0),
+                const Icon(Icons.car_rental, size: 100.0),
                 const SizedBox(height: 50.0),
                 Text(
                   'Seja Bem Vindo(a)',

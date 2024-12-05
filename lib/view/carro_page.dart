@@ -60,7 +60,6 @@ class _CarroPageState extends State<CarroPage> {
   final String cor = _corController.text.trim();
   final String categoria = _categoriaController.text.trim();
 
-  // Validação dos campos
   if (marca.isEmpty || modelo.isEmpty || cor.isEmpty || categoria.isEmpty || ano <= 0) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Preencha todos os campos corretamente.')),
@@ -69,7 +68,6 @@ class _CarroPageState extends State<CarroPage> {
   }
 
   try {
-    // Obter o ID do usuário autenticado
     final String? userId = await getCurrentUserId();
     if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -79,7 +77,6 @@ class _CarroPageState extends State<CarroPage> {
     }
 
     if (_editingCarroId == null) {
-      // Criar um novo carro
       await _carroService.createCarro(
         marca: marca,
         modelo: modelo,
@@ -89,7 +86,6 @@ class _CarroPageState extends State<CarroPage> {
         userId: userId,
       );
     } else {
-      // Atualizar um carro existente
       await _carroService.updateCarro(
         docId: _editingCarroId!,
         marca: marca,
@@ -100,11 +96,9 @@ class _CarroPageState extends State<CarroPage> {
       );
     }
 
-    // Limpar os campos e retornar à tela anterior
     _clearFields();
     Navigator.pop(context);
   } catch (e) {
-    // Tratamento de erros
     print('Erro ao salvar carro: $e');
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Erro ao salvar o carro: $e')),

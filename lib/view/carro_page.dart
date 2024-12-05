@@ -22,7 +22,7 @@ class _CarroPageState extends State<CarroPage> {
   final TextEditingController _categoriaController = TextEditingController();
 
   String? _editingCarroId;
-  bool _hasUnsavedChanges = false;
+  bool _userEdited = false;
 
   @override
   void initState() {
@@ -128,7 +128,9 @@ class _CarroPageState extends State<CarroPage> {
   @override
   Widget build(BuildContext context) {
     
-    return Scaffold(
+    return WillPopScope(
+    onWillPop: requestPop,
+    child: Scaffold(
       appBar: AppBar(
         title: Text(_editingCarroId == null ? 'Adicionar Carro' : 'Editar Carro'),
       ),
@@ -139,23 +141,38 @@ class _CarroPageState extends State<CarroPage> {
             TextField(
               controller: _marcaController,
               decoration: InputDecoration(labelText: 'Marca'),
+              onChanged: (text) {
+                _userEdited = true;
+              },
             ),
             TextField(
               controller: _modeloController,
               decoration: InputDecoration(labelText: 'Modelo'),
+              onChanged: (text) {
+                _userEdited = true;
+              },
             ),
             TextField(
               controller: _anoController,
               decoration: InputDecoration(labelText: 'Ano'),
               keyboardType: TextInputType.number,
+              onChanged: (text) {
+                _userEdited = true;
+              },
             ),
             TextField(
               controller: _corController,
               decoration: InputDecoration(labelText: 'Cor'),
+              onChanged: (text) {
+                _userEdited = true;
+              },
             ),
             TextField(
               controller: _categoriaController,
               decoration: InputDecoration(labelText: 'Categoria'),
+              onChanged: (text) {
+                _userEdited = true;
+              },
             ),
             SizedBox(height: 20),
             ElevatedButton(
@@ -165,6 +182,40 @@ class _CarroPageState extends State<CarroPage> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
+  Future<bool> requestPop() async {
+    if (_userEdited) {
+      bool shouldLeave = await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text("Descartar Alterações"),
+            content: const Text(
+                "Se sair, as alterações serão perdidas. Deseja continuar?"),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: const Text("Cancelar"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+                child: const Text("Sim"),
+              ),
+            ],
+          );
+        },
+      );
+
+      return Future.value(shouldLeave ?? false);
+    } else {
+      return Future.value(true);
+    }
+  }
+  
 }
